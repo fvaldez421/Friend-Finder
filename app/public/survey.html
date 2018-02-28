@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Friend Finder</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="./app/assets/style.css"></link> 
+	<script src="https://code.jquery.com/jquery.js"></script>
+	
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-10" style="margin: auto;">
+				<div class="jumbotron jumbotron-fluid">
+					<div class="container">
+						<h1 class="display-4">Friend Finder</h1>
+						<p class="lead">The World's Best Friender Site!</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-10" style="margin: auto;">
+				<div class="form-group" id="content">
+						<br>
+						<h4 class="card-title">About You!</h4>
+						<label for="name">Name</label>
+						<input type="text" name="name" class="form-control" id="name" placeholder="Enter Name">
+						<br>
+						<label for="name">Link to Photo</label>
+						<input type="text" name="link" class="form-control" id="link" placeholder="Link">
+						<br>
+						<br>						
+						<h4 class="card-title">Survey!</h4>
+						<br>
+
+
+						<div id="questions">
+						</div>
+
+
+						<a href="/survey">
+							<button type="button" id="submit" class="btn btn-primary" href="/survey">Submit</button>
+						</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</body>
+
+<script type="text/javascript">
+
+
+
+var questions = [
+	"Your mind is always buzzing with unexplored ideas and plans.", 
+	"Generally speaking, you rely more on your experience than your imagination.", 
+	"You find it easy to stay relaxed and focused even when there is some pressure.", 
+	"You rarely do something just out of sheer curiosity.",
+	"People can rarely upset you.", 
+	"It is often difficult for you to relate to other people’s feelings.", 
+	"In a discussion, truth should be more important than people’s sensitivities.", 
+	"You rarely get carried away by fantasies and ideas.", 
+	"You think that everyone’s views should be respected regardless of whether they are supported by facts or not.", 
+	"You feel more energetic after spending time with a group of people."
+];
+
+var options = ["1 (Strongly Disagree)", "2", "3", "4", "5 (Strongly Agree"];
+
+var scores = [];
+
+$(document).ready(function(){
+
+	for (var i = 0; i < questions.length; i++) {
+		var questNum = i + 1;
+		var qDiv = $("<div>").addClass("question-" + i);
+		var head = $("<h5>").text("Question " + questNum);
+		var quest = $("<p>").text(questions[i]);
+
+		var select = $("<select>").addClass("chosen-select");
+		select.attr("id", "q" + i);
+		select.attr("value", i);
+		select.attr("data-placeholder", "Choose an option");
+		var br = $("<br>");
+
+		for (var j = 0; j < options.length; j++) {
+			var option = $("<option>").text(options[j]);
+			option.attr("value", j);
+			select.append(option);
+		};
+
+		qDiv.append(head);
+		qDiv.append(quest);
+		qDiv.append(select);
+		$("#questions").append(qDiv);
+		$("#questions").append(br);
+	};
+
+
+	$("#submit").on("click", function(event) {
+		event.preventDefault();
+
+		for (var n = 0; n < questions.length; n++) {
+			scores.push($("#q" + n).val());
+		};
+
+		var newFriend = {
+			"name": $("#name").val().trim(),
+			"img": $("#link").val().trim(),
+			"scores": scores
+		};
+
+		$.post("/api/new", newFriend).done(function(data) {
+			console.log(data);
+			// console.log(data.body.name)
+			$("#content").html("<h3>Your Match!</h3><br><h4>" + data.name + "</h4><br><img src='" + data.img + "'><br>");
+		});
+
+		$("#name").val("");
+		$("#link").val("");
+		scores = [];
+
+		$.ajax({
+			url: "/api/friends",
+			method: "GET"
+		}).done(function(data) {
+	        console.log(data);
+	        console.log("------------------------------------");
+
+	      });
+	});
+});
+
+
+</script>
+
+</html>
